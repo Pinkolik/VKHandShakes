@@ -13,25 +13,36 @@ class VKHandShakes:
         self.vk = vk_session.get_api()
 
     def calculate_route(self):
-        route = [self.source_id]
-        depth = 0
-        self.search_in_friends(route.copy(), depth)
+        routes = [[self.source_id]]
+        finish = False
+        for i in range(0, self.max_depth):
+            routes = self.get_next_level_friends(routes)
+            print(len(routes))
+            for route in routes:
+                last_user_id = route[-1]
+                if last_user_id == self.destination_id:
+                    self.routes.append(route)
+                    finish = True
+            if finish:
+                break
 
-    def search_in_friends(self, route, depth):
-        depth += 1
-        if depth == self.max_depth:
-            return
-        last_user_id = route[-1]
-        friends_ids = self.get_friends_user_ids(last_user_id)
-        if self.destination_id in friends_ids:
-            route.append(self.destination_id)
-            self.routes.append(route)
-            return
-        for user_id in friends_ids:
-            if user_id not in route:
-                new_route = route.copy()
-                new_route.append(user_id)
-                self.search_in_friends(new_route, depth)
+    def get_next_level_friends(self, routes):
+        result_routes = []
+        for route in routes:
+            last_user_id = route[-1]
+            friends_ids = self.get_friends_user_ids(last_user_id)
+            for user_id in friends_ids:
+                skip = False
+                for result_route in result_routes:
+                    if user_id in result_route:
+                        skip = True
+                        break
+                if not skip:
+                    new_route = route.copy()
+                    new_route.append(user_id)
+                    result_routes.append(new_route)
+
+        return result_routes
 
     def get_friends_user_ids(self, user_id: int) -> list:
         try:
