@@ -4,7 +4,7 @@ import vk_api
 class VKHandShakes:
     service_token = '9f80a4009f80a4009f80a400e19fd7009c99f809f80a400c5fc0f1a903421384f8fad84'
 
-    def __init__(self, source_id: str, destination_id: str, max_depth: int = 5):
+    def __init__(self, source_id: int, destination_id: int, max_depth: int = 5):
         self.source_id = source_id
         self.destination_id = destination_id
         self.max_depth = max_depth
@@ -29,11 +29,12 @@ class VKHandShakes:
             return
         for user_id in friends_ids:
             if user_id not in route:
-                new_route = route.copy().append(user_id)
+                new_route = route.copy()
+                new_route.append(user_id)
                 self.search_in_friends(new_route, depth)
 
-    def get_friends_user_ids(self, user_id) -> list:
-        return self.vk.friends.get(user_id)['items']
+    def get_friends_user_ids(self, user_id: int) -> list:
+        return self.vk.friends.get(user_id=user_id)['items']
 
     def print_routes(self):
         for route in self.routes:
