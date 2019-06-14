@@ -38,6 +38,7 @@ class VKHandShakes:
             return self.vk.friends.get(user_id=user_id)['items']
         except vk_api.ApiError as api_exception:
             print(api_exception, api_exception.values, sep=' ')
+            return []
 
     def print_routes(self):
         for route in self.routes:
