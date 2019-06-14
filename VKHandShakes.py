@@ -17,7 +17,7 @@ class VKHandShakes:
         finish = False
         for i in range(0, self.max_depth):
             routes = self.get_next_level_friends(routes)
-            print(len(routes))
+            print('Friends at level', i, len(routes))
             for route in routes:
                 last_user_id = route[-1]
                 if last_user_id == self.destination_id:
@@ -32,12 +32,7 @@ class VKHandShakes:
             last_user_id = route[-1]
             friends_ids = self.get_friends_user_ids(last_user_id)
             for user_id in friends_ids:
-                skip = False
-                for result_route in result_routes:
-                    if user_id in result_route:
-                        skip = True
-                        break
-                if not skip:
+                if user_id not in route:
                     new_route = route.copy()
                     new_route.append(user_id)
                     result_routes.append(new_route)
