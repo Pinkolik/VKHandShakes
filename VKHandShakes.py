@@ -34,7 +34,10 @@ class VKHandShakes:
                 self.search_in_friends(new_route, depth)
 
     def get_friends_user_ids(self, user_id: int) -> list:
-        return self.vk.friends.get(user_id=user_id)['items']
+        try:
+            return self.vk.friends.get(user_id=user_id)['items']
+        except vk_api.ApiError as api_exception:
+            print(api_exception + ' ' + api_exception.values)
 
     def print_routes(self):
         for route in self.routes:
