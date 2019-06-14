@@ -34,3 +34,7 @@ class VKHandShakes:
 
     def get_friends_user_ids(self, user_id) -> list:
         return self.vk.friends.get(user_id)['items']
+
+    def print_routes(self):
+        for route in self.routes:
+            print(route)
