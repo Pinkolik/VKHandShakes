@@ -1,16 +1,16 @@
-import vk_api
+import requests
+import threading
 
 
 class VKHandShakes:
     service_token = '9f80a4009f80a4009f80a400e19fd7009c99f809f80a400c5fc0f1a903421384f8fad84'
+    friends_get_url = 'https://api.vk.com/method/friends.get'
 
     def __init__(self, source_id: int, destination_id: int, max_depth: int = 5):
         self.source_id = source_id
         self.destination_id = destination_id
         self.max_depth = max_depth
         self.routes = []
-        vk_session = vk_api.VkApi(token=VKHandShakes.service_token)
-        self.vk = vk_session.get_api()
 
     def calculate_route(self):
         routes = [[self.source_id]]
@@ -28,22 +28,33 @@ class VKHandShakes:
 
     def get_next_level_friends(self, routes):
         result_routes = []
+        thread_pool = []
         for route in routes:
             last_user_id = route[-1]
-            friends_ids = self.get_friends_user_ids(last_user_id)
+            thread = threading.Thread(target=self.add_route_to_result_routes, args=(last_user_id, result_routes, route))
+            thread_pool.append(thread)
+            thread.start()
+        for thread in thread_pool:
+            thread.join()
+        return result_routes
+
+    def add_route_to_result_routes(self, last_user_id, result_routes, route):
+        friends_ids = self.get_friends_user_ids(last_user_id)
+        if len(friends_ids) > 0:
             for user_id in friends_ids:
                 if user_id not in route:
-                    new_route = route.copy()
+                    new_route = list(route)
                     new_route.append(user_id)
                     result_routes.append(new_route)
 
-        return result_routes
-
-    def get_friends_user_ids(self, user_id: int) -> list:
-        try:
-            return self.vk.friends.get(user_id=user_id)['items']
-        except vk_api.ApiError as api_exception:
-            print(api_exception, api_exception.values, sep=' ')
+    @staticmethod
+    def get_friends_user_ids(user_id: int) -> list:
+        payload = {'user_id': user_id, 'v': 5.95, 'access_token': VKHandShakes.service_token}
+        reply = requests.get(VKHandShakes.friends_get_url, params=payload).json()
+        if 'response' in reply:
+            return reply['response']['items']
+        else:
+            # print(reply['error'])
             return []
 
     def print_routes(self):
